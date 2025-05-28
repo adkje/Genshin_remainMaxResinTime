@@ -3,13 +3,14 @@ import datetime
 import asyncio
 
 import GenshinAPIList as Glist
+
+
 url = "https://bbs-api-os.hoyoverse.com/game_record/genshin/api/dailyNote"
-class User:
+class requestAPI:
     def __init__(self,name,cookies,uid):
         self.name = name
         self.cookies = cookies
         self.uid = uid
-        # あー完璧
 
         self.params =  {
                           "role_id": f"{self.uid}",
@@ -19,6 +20,7 @@ class User:
     
     def send_API(self):
         self.Receive_response = requests.get(url, cookies = self.cookies, params = self.params).json()
+        print("SendAPI実行")
         return self.Receive_response
     
     def extract(self,jsondata):
@@ -38,22 +40,29 @@ class User:
         
     def retouch(self):
         # 完全回復までにかかる時間
-        int_resin_time = int(self.necessaryData["resin_recovery_time"])
+        int_resin_minute = int(self.necessaryData["resin_recovery_time"])
         nowDate = datetime.datetime.today()
-        addTime = datetime.timedelta(seconds=int_resin_time)
+        addTime = datetime.timedelta(seconds=int_resin_minute)
+
         recover_date = nowDate + addTime
         eightMinute = 8 * 60
-        sleeptime = int_resin_time % eightMinute
-        return sleeptime
+        sleeptime = int_resin_minute % eightMinute
+        
+        return sleeptime,recover_date
 
-User1info = Glist.User1
-User1 = User(User1info["name"],User1info["Cookies"],User1info["uid"])
+User1info = Glist.User["User1"]
+User1 = requestAPI(User1info["name"],User1info["Cookies"],User1info["uid"])
 
-def while_process(User):
-    Receive_response = User.send_API()
-    User.extract(Receive_response)
-    recover_date = User.retouch()
-    
-    return recover_date
+async def while_process(User):
+            print("while_process始まり")
+            Receive_response = User.send_API()
+            User.extract(Receive_response)
+            recover_date = User.retouch()
+            print(f"次の回復時間は{recover_date}秒です。")
+            await asyncio.sleep(recover_date)
+            print("as;lfkjas;f")
+            return recover_date
 
-print(while_process(User1))
+# print(while_process(User1))
+if __name__ == "__main__":
+    asyncio.run(while_process(User1))
