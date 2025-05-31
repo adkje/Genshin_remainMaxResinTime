@@ -4,7 +4,6 @@ import asyncio
 
 import GenshinAPIList as Glist
 
-
 url = "https://bbs-api-os.hoyoverse.com/game_record/genshin/api/dailyNote"
 class requestAPI:
     def __init__(self,name,cookies,uid):
@@ -21,10 +20,10 @@ class requestAPI:
     def send_API(self):
         self.Receive_response = requests.get(url, cookies = self.cookies, params = self.params).json()
         print("SendAPI実行")
-        return self.Receive_response
     
-    def extract(self,jsondata):
-        data = jsondata["data"]
+    def extract(self):
+        print("extract実行")
+        data = self.Receive_response["data"]
 
         current_resin = data["current_resin"]
         max_resin = data["max_resin"]
@@ -37,32 +36,36 @@ class requestAPI:
             "resin_recovery_time" : resin_recovery_time,
             "is_extra_task_reward_received" :is_extra_task_reward_received,
         }
+        return self.necessaryData
         
     def retouch(self):
         # 完全回復までにかかる時間
+        print("retouch実行")
         int_resin_minute = int(self.necessaryData["resin_recovery_time"])
         nowDate = datetime.datetime.today()
         addTime = datetime.timedelta(seconds=int_resin_minute)
 
-        recover_date = nowDate + addTime
         eightMinute = 8 * 60
         sleeptime = int_resin_minute % eightMinute
-        
-        return sleeptime,recover_date
 
-User1info = Glist.User["User1"]
-User1 = requestAPI(User1info["name"],User1info["Cookies"],User1info["uid"])
+        recovered_date = nowDate + addTime
+        recovered_date = recovered_date.replace(microsecond = 0)
+        recovered_date = recovered_date.strftime("%m月%d日 %H:%M:%S")
 
-async def while_process(User):
-            print("while_process始まり")
-            Receive_response = User.send_API()
-            User.extract(Receive_response)
-            recover_date = User.retouch()
-            print(f"次の回復時間は{recover_date}秒です。")
-            await asyncio.sleep(recover_date)
-            print("as;lfkjas;f")
-            return recover_date
+        retouchedData = [sleeptime,recovered_date]
+        return retouchedData
+    
+    def gather_process(self):
+        print("gather_proess実行")
+        self.send_API()
+        # 未加工状態で使えるデータを収納
+        self.extract()
+        retouchedData = self.retouch()
+        # 加工状態で使えるデータを追加収納
+        self.necessaryData.update(sleeptime=retouchedData[0],recovered_date=retouchedData[1])
+        print("gather_procedss終わり")
+        print(self.necessaryData)
+        return self.necessaryData
 
-# print(while_process(User1))
-if __name__ == "__main__":
-    asyncio.run(while_process(User1))
+
+

@@ -1,5 +1,7 @@
-from SendAPI import requestAPI
-from SendAPI import while_process
+
+from PassiveDisco import PassiveAuto
+# from PassiveDisco import bot_ready
+
 import discord
 import asyncio
 import os
@@ -7,48 +9,74 @@ import os
 import GenshinAPIList as Glist
     
 # This example requires the 'message_content' intent.
-intents = discord.Intents.default()
-intents.message_content = True
 
-client = discord.Client(intents=intents)
+bot_ready = asyncio.Event()
+allUser = []
+# 面倒になっちゃった。
 
 class Bot(discord.Client):
-    
+
     async def on_ready(self):
         print(f'We have logged in as {client.user}')
-
+        await bot_ready.set()
+        
     async def on_message(self,message):
         if message.author == client.user:
             return
         print("message着弾")
-        
-        user_id = message.author.id
-
+        # 1.特定のメッセージか否か,2.そのユーザーが存在するか,3
+    
         if message.content.startswith('$test'):
             print("testです。")
+            # type int
+            print(type(message.author.id))
+            for i in range(0,len(Glist.User)):
 
-            for i in (range(1,2)):
-                print("判定中")
-                userDic = Glist.User[f"User{i}"]
-                discordIdDic = userDic["DiscordID"]
+                if bool(Glist.User.get(f"User{i}").get("discordId")):
 
-                if discordIdDic == user_id:
-                    print("同じです。")
-                    userDic["ClassObject"] = requestAPI(userDic["name"],userDic["Cookies"],userDic["uid"])
-                    break
-                    # return userDic
-            
-            await while_process(userDic["ClassObject"])
-            # User
-            await message.channel.send('Hello!')
+                    if message.author.id == Glist.User[f"User{i}"]["discordId"]:
+                        userInstance = Glist.User[f"User{i}"]["classObject"]
+                        current_resin = userInstance.requiredData["current_resin"]
+                        recovered_date = userInstance.requiredData["recovered_date"]
+                        await userInstance.sendUser.send(f"現在の樹脂は{current_resin}です！200に達するまで{recovered_date}分です！" )
+
+                        break
+                                    
+                else:
+                    await userInstance.sendUser.send("ユーザー登録をしてください！")
 
 
 intents = discord.Intents.default()
 intents.message_content = True
 
 client = Bot(intents=intents)
+
+# async def define(discordId):
+
+#     return sendUser
+
+
+for i in range(0,len(Glist.User)):
+        User = Glist.User[f"User{i}"]
+        print(f"これは20行目です。{i}")
+        discordId = User["discordId"]
+        # sendUser = asyncio.run(define(discordId))
+
+        User["classObject"] = PassiveAuto(User["name"],User["Cookies"],User["uid"],client,discordId)
+        allUser.append(User["classObject"])
+
+
+
+async def fire(userClassObject):
+    await bot_ready.wait()
+    await userClassObject.korosuzo()
+
 async def BootBot():
     await client.start(os.environ["Distoken"])
 
-asyncio.run(BootBot())
-print(Glist.User)
+async def gather():
+    await asyncio.gather(BootBot(),*(fire(classObject) for classObject in allUser))
+
+    
+asyncio.run(gather())
+# print(Glist.User)
