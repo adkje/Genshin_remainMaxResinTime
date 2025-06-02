@@ -19,10 +19,8 @@ class requestAPI:
     
     def send_API(self):
         self.Receive_response = requests.get(url, cookies = self.cookies, params = self.params).json()
-        print("SendAPI実行")
     
     def extract(self):
-        print("extract実行")
         data = self.Receive_response["data"]
 
         current_resin = data["current_resin"]
@@ -40,7 +38,6 @@ class requestAPI:
         
     def retouch(self):
         # 完全回復までにかかる時間
-        print("retouch実行")
         int_resin_minute = int(self.necessaryData["resin_recovery_time"])
         nowDate = datetime.datetime.today()
         addTime = datetime.timedelta(seconds=int_resin_minute)
@@ -56,15 +53,12 @@ class requestAPI:
         return retouchedData
     
     def gather_process(self):
-        print("gather_proess実行")
         self.send_API()
         # 未加工状態で使えるデータを収納
         self.extract()
         retouchedData = self.retouch()
         # 加工状態で使えるデータを追加収納
         self.necessaryData.update(sleeptime=retouchedData[0],recovered_date=retouchedData[1])
-        print("gather_procedss終わり")
-        print(self.necessaryData)
         return self.necessaryData
 
 

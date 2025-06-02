@@ -38,7 +38,7 @@ class Bot(discord.Client):
                         userInstance = Glist.User[f"User{i}"]["classObject"]
                         current_resin = userInstance.requiredData["current_resin"]
                         recovered_date = userInstance.requiredData["recovered_date"]
-                        await userInstance.sendUser.send(f"現在の樹脂は{current_resin}です！200に達するまで{recovered_date}分です！" )
+                        await userInstance.sendUser.send(f"BootBot現在の樹脂は{current_resin}です！200に達するまで{recovered_date}です！" )
 
                         break
                                     
@@ -79,4 +79,3 @@ async def gather():
 
     
 asyncio.run(gather())
-# print(Glist.User)
