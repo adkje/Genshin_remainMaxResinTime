@@ -1,6 +1,5 @@
 import requests
 import datetime
-import asyncio
 
 import GenshinAPIList as Glist
 

@@ -1,21 +1,26 @@
 
-from PassiveDisco import PassiveAuto
-# from PassiveDisco import bot_ready
-
 import discord
 import asyncio
 import os
 
 import GenshinAPIList as Glist
-    
-# This example requires the 'message_content' intent.
+from PassiveDisco import PassiveAuto
+from PassiveDisco import PassiveManual
 
+# This example requires the 'message_content' intent.
+# 必要モジュールのインポート
+import os
+from dotenv import load_dotenv
+
+# .envファイルの内容を読み込見込む
+load_dotenv()
+
+# os.environを用いて環境変数を表示させます
 bot_ready = asyncio.Event()
 allUser = []
 # 面倒になっちゃった。
 
-class Bot(discord.Client):
-
+class Bot(discord.Client,PassiveManual):
     async def on_ready(self):
         print(f'We have logged in as {client.user}')
         await bot_ready.set()
@@ -24,27 +29,7 @@ class Bot(discord.Client):
         if message.author == client.user:
             return
         print("message着弾")
-        # 1.特定のメッセージか否か,2.そのユーザーが存在するか,3
-    
-        if message.content.startswith('$test'):
-            print("testです。")
-            # type int
-            print(type(message.author.id))
-            for i in range(0,len(Glist.User)):
-
-                if bool(Glist.User.get(f"User{i}").get("discordId")):
-
-                    if message.author.id == Glist.User[f"User{i}"]["discordId"]:
-                        userInstance = Glist.User[f"User{i}"]["classObject"]
-                        current_resin = userInstance.requiredData["current_resin"]
-                        recovered_date = userInstance.requiredData["recovered_date"]
-                        await userInstance.sendUser.send(f"BootBot現在の樹脂は{current_resin}です！200に達するまで{recovered_date}です！" )
-
-                        break
-                                    
-                else:
-                    await userInstance.sendUser.send("ユーザー登録をしてください！")
-
+        await self.getValueOfClass(message)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -69,13 +54,12 @@ for i in range(0,len(Glist.User)):
 
 async def fire(userClassObject):
     await bot_ready.wait()
-    await userClassObject.korosuzo()
+    await userClassObject.while_process()
 
 async def BootBot():
     await client.start(os.environ["Distoken"])
 
 async def gather():
     await asyncio.gather(BootBot(),*(fire(classObject) for classObject in allUser))
-
     
 asyncio.run(gather())
