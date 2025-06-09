@@ -17,7 +17,7 @@ class PassiveAuto(requestAPI):
             # 最後に送るところでエラー吐いている。
         # requireDataはwhile_processで定義。
         if self.requiredData["current_resin"] == 180:
-            await self.sendUser.send(f"PassiveDisco現在の樹脂は{self.requiredData["current_resin"]}です！200に達するまで{self.requiredData["recovered_date"]}です！" )
+            await self.sendUser.send(f"PassiveDisco現在の樹脂は{self.requiredData["current_resin"]}です！200に達するのは{self.requiredData["recovered_date"]}です！" )
         # await asyncio.sleep(self.requiredData["sleeptime"])
 
 
@@ -53,6 +53,9 @@ class PassiveAuto(requestAPI):
             print(self.requiredData["is_extra_task_reward_received"])
             await asyncio.sleep(self.requiredData["sleeptime"])
 
+
+
+
 class PassiveManual(requestAPI):
     async def sendManualMessage(self,message,userInstance,):
         current_resin = userInstance.requiredData["current_resin"]
@@ -60,7 +63,7 @@ class PassiveManual(requestAPI):
         is_extra_task_reqard_received = userInstance.requiredData["is_extra_task_reward_received"]
         
         if message.content.startswith('$getresintest'):
-            await userInstance.sendUser.send(f"BootBot現在の樹脂は{current_resin}です！200に達するまで{recovered_date}です！" )
+            await userInstance.sendUser.send(f"BootBot現在の樹脂は{current_resin}です！200に達するのは{recovered_date}です！" )
 
         if message.content.startswith('$dailymissiontest'):
             # PassiveAutoをリファクタリングして同一コードをコンポーネント化できる。
