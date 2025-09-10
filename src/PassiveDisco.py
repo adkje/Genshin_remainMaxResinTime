@@ -14,7 +14,6 @@ class PassiveAuto(requestAPI):
 
 
     async def korosuzo(self):
-            # 最後に送るところでエラー吐いている。
         # requireDataはwhile_processで定義。
         if self.requiredData["current_resin"] == 180:
             await self.sendUser.send(f"PassiveDisco現在の樹脂は{self.requiredData["current_resin"]}です！200に達するのは{self.requiredData["recovered_date"]}です！" )
@@ -29,9 +28,10 @@ class PassiveAuto(requestAPI):
 
         else:
             await self.sendUser.send("デイリー任務を完了しています。")
+    
+    async def errorHundRing(self):
+        await self.sendUser.send("botが止まりました。")
 
-
-        
     async def dailyScheduler(self):
         scheduler = AsyncIOScheduler()
         scheduler.add_job(self.dailySend, 'cron', hour=23, minute=00)
@@ -44,14 +44,16 @@ class PassiveAuto(requestAPI):
         print("while_processです")
         asyncio.create_task(self.dailyScheduler())
         while True:
+            try:   
+                self.requiredData = super().gather_process()
+                await self.korosuzo()
+            except:
+                await self.errorHundRing()
 
-            self.requiredData = super().gather_process()
-
-            await self.korosuzo()
-            # await self.dailySend()
-            print(self.requiredData["sleeptime"])
-            print(self.requiredData["is_extra_task_reward_received"])
-            await asyncio.sleep(self.requiredData["sleeptime"])
+            finally:
+            # print(self.requiredData["sleeptime"])
+            # print(self.requiredData["is_extra_task_reward_received"])
+                await asyncio.sleep(self.requiredData["sleeptime"])
 
 
 
