@@ -2,27 +2,26 @@
 import discord
 import asyncio
 import os
+from dotenv import load_dotenv
 
 import GenshinAPIList as Glist
+from PassiveDisco import getSendMessages
 from PassiveDisco import PassiveAuto
 from PassiveDisco import PassiveManual
 
-# This example requires the 'message_content' intent.
-# 必要モジュールのインポート
-import os
-from dotenv import load_dotenv
 
-# .envファイルの内容を読み込見込む
+
 load_dotenv()
 
-# os.environを用いて環境変数を表示させます
 bot_ready = asyncio.Event()
-allUser = []
-# 面倒になっちゃった。
+UserClass = []
 
 class Bot(discord.Client,PassiveManual):
     async def on_ready(self):
         print(f'We have logged in as {client.user}')
+        # # 一度だけjsonを読み込ませたいため、最初はjsonの内容をNoneと定義しておく。
+        # await getSendMessages()
+        print("おはようございます。")
         await bot_ready.set()
         
     async def on_message(self,message):
@@ -48,18 +47,18 @@ for i in range(0,len(Glist.User)):
         # sendUser = asyncio.run(define(discordId))
 
         User["classObject"] = PassiveAuto(User["name"],User["Cookies"],User["uid"],client,discordId)
-        allUser.append(User["classObject"])
+        UserClass.append(User["classObject"])
 
 
 
 async def fire(userClassObject):
     await bot_ready.wait()
-    await userClassObject.while_process()
+    await userClassObject.auto_send_message_to_user()
 
 async def BootBot():
     await client.start(os.environ["Distoken"])
 
 async def gather():
-    await asyncio.gather(BootBot(),*(fire(classObject) for classObject in allUser))
+    await asyncio.gather(BootBot(),*(fire(classObject) for classObject in UserClass))
     
 asyncio.run(gather())

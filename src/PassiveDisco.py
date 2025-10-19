@@ -1,9 +1,26 @@
 import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from string import Template
+import json
 
-from SendAPI import requestAPI
+from sendAPI import requestAPI
 import GenshinAPIList as Glist
 
+message_json = None
+print(message_json)
+print("PassiveDisco.pyです。")
+with open("src/message.json", "r", encoding="utf-8") as f:
+        message_json = json.load(f)
+maxResinTime = Template(message_json["resinRelated"]["maxResinTime"])
+dailyCompletion = message_json["dailyRelated"]["dailyCompletion"]
+dailyIncompletion = message_json["dailyRelated"]["dailyIncompletion"]
+botStop = message_json["errorMessage"]["botStop"]
+
+def getSendMessages():
+    return {"maxResinTime": maxResinTime,
+            "dailyCompletion": dailyCompletion,
+            "dailyIncompletion": dailyIncompletion,
+            "botStop": botStop}
 
 class PassiveAuto(requestAPI):
     # def __init__(self, name, cookies, uid, sendUser):
@@ -11,35 +28,38 @@ class PassiveAuto(requestAPI):
         super().__init__(name, cookies, uid,)
         self.client = client
         self.discordId = discordId
+        self.messages = getSendMessages()
 
 
     async def korosuzo(self):
         # requireDataはwhile_processで定義。
-        if self.requiredData["current_resin"] == 180:
-            await self.sendUser.send(f"PassiveDisco現在の樹脂は{self.requiredData["current_resin"]}です！200に達するのは{self.requiredData["recovered_date"]}です！" )
+        if self.requiredData["current_resin"] == 132:
+            messages = getSendMessages()
+            message = messages["maxResinTime"].substitute(currentResin=self.requiredData["current_resin"], recoveryTime=self.requiredData["recovered_date"])
+            await self.sendUser.send(f"おはよう{message}" )
         # await asyncio.sleep(self.requiredData["sleeptime"])
 
 
     async def dailySend(self):
+        print(self.messages)
 
         if self.requiredData["is_extra_task_reward_received"] == False:
-            # await self.sendUser.send("デイリー任務が未完了です。")
-            await self.sendUser.send("デイリー任務が未完了です。")
+            await self.sendUser.send(f"{self.messages["dailyIncompletion"]}")
 
         else:
-            await self.sendUser.send("デイリー任務を完了しています。")
+            await self.sendUser.send(f"{self.messages["dailyCompletion"]}")
     
     async def errorHundRing(self):
-        await self.sendUser.send("botが止まりました。")
+        messages = await getSendMessages()
+        await self.sendUser.send(f"{self.messages["botStop"]}")
 
     async def dailyScheduler(self):
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(self.dailySend, 'cron', hour=23, minute=00)
+        scheduler.add_job(self.dailySend, 'cron', hour=3, minute=15)
         scheduler.start()
         await asyncio.Event().wait()
 
-    async def while_process(self):
-
+    async def auto_send_message_to_user(self):
         self.sendUser = await self.client.fetch_user(self.discordId)
         print("while_processです")
         asyncio.create_task(self.dailyScheduler())
@@ -47,52 +67,59 @@ class PassiveAuto(requestAPI):
             try:   
                 self.requiredData = super().gather_process()
                 await self.korosuzo()
-            except:
-                await self.errorHundRing()
-
-            finally:
-            # print(self.requiredData["sleeptime"])
-            # print(self.requiredData["is_extra_task_reward_received"])
+                print(self.requiredData["sleeptime"])
                 await asyncio.sleep(self.requiredData["sleeptime"])
+            except Exception as e:
+                await self.errorHundRing()
+                print(f"エラーメッセージは{e}")
+                await asyncio.sleep(3600)
 
 
 
 
 class PassiveManual(requestAPI):
+    def __init__(self, name, cookies, uid, client, discordId):
+        super().__init__(name, cookies, uid,)
+        self.client = client
+        self.discordId = discordId
+        self.messages = getSendMessages()
+
     async def sendManualMessage(self,message,userInstance,):
-        current_resin = userInstance.requiredData["current_resin"]
-        recovered_date = userInstance.requiredData["recovered_date"]
+        # current_resin = userInstance.requiredData["current_resin"]
+        # recovered_date = userInstance.requiredData["recovered_date"]
         is_extra_task_reqard_received = userInstance.requiredData["is_extra_task_reward_received"]
         
         if message.content.startswith('$getresintest'):
-            await userInstance.sendUser.send(f"BootBot現在の樹脂は{current_resin}です！200に達するのは{recovered_date}です！" )
+            messages = getSendMessages()
+            message = messages["maxResinTime"].substitute(currentResin=userInstance.requiredData["current_resin"], recoveryTime=userInstance.requiredData["recovered_date"])
+            await userInstance.sendUser.send(f"{message}" )
 
         if message.content.startswith('$dailymissiontest'):
             # PassiveAutoをリファクタリングして同一コードをコンポーネント化できる。
             if is_extra_task_reqard_received == False:
-                # await self.sendUser.send("デイリー任務が未完了です。")
-                await userInstance.sendUser.send("デイリー任務が未完了です。")
+                await userInstance.sendUser.send(f"{self.messages["dailyIncompletion"]}")
 
             else:
-                await userInstance.sendUser.send("デイリー任務を完了しています。")
+                await userInstance.sendUser.send(f"{self.messages["dailyCompletion"]}")
 
     async def getValueOfClass(self,message):
-        # type int
+
+        if not message.content.startswith(('$getresintest','$dailymissiontest')):
+            return
+        
         print("getValue")
+        # type int
         for i in range(0,len(Glist.User)):
             print("infor")
-            if message.content.startswith(('$getresintest','$dailymissiontest')):
-                print("instart")
-                if message.author.id == Glist.User.get(f"User{i}").get("discordId"):
-                    print("indiscord")
-                    # classObjectにはPassiveAutoが格納されている。
-                    userInstance = Glist.User[f"User{i}"]["classObject"]
-                    await self.sendManualMessage(message,userInstance)
-
-                    break
+            if message.author.id == Glist.User.get(f"User{i}").get("discordId"):
+                print("indiscord")
+                # classObjectにはPassiveAutoが格納されている。
+                userInstance = Glist.User[f"User{i}"]["classObject"]
+                await self.sendManualMessage(message,userInstance)
+                break
                                         
-                elif None == Glist.User.get(f"User{i}").get("discordId"):
-                    await userInstance.sendUser.send("ユーザー登録をしてください！")
+            elif None == Glist.User.get(f"User{i}").get("discordId"):
+                await userInstance.sendUser.send("ユーザー登録をしてください！")
     
     
             

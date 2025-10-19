@@ -19,7 +19,7 @@ class requestAPI:
     def send_API(self):
         self.Receive_response = requests.get(url, cookies = self.cookies, params = self.params).json()
     
-    def extract(self):
+    def extract_datas(self):
         data = self.Receive_response["data"]
 
         current_resin = data["current_resin"]
@@ -35,27 +35,30 @@ class requestAPI:
         }
         return self.necessaryData
         
-    def retouch(self):
+    def refine_used_time(self):
         # 完全回復までにかかる時間
         int_resin_minute = int(self.necessaryData["resin_recovery_time"])
         nowDate = datetime.datetime.today()
         addTime = datetime.timedelta(seconds=int_resin_minute)
 
         eightMinute = 8 * 60
-        sleeptime = int_resin_minute % eightMinute
+        sleepTime = int_resin_minute % eightMinute
 
-        recovered_date = nowDate + addTime
-        recovered_date = recovered_date.replace(microsecond = 0)
-        recovered_date = recovered_date.strftime("%m月%d日 %H:%M:%S")
+        resin_recovered_time = nowDate + addTime
+        print(f"おはよう{resin_recovered_time}")
+        # resin_recovered_date = resin_recovered_time.replace(microsecond = 0)
+        # print(f"こんにちは{resin_recovered_date}")
+        resin_recovered_date = resin_recovered_time.strftime("%m月%d日 %H:%M:%S")
+        print(f"おやすみ{resin_recovered_date}")
 
-        retouchedData = [sleeptime,recovered_date]
-        return retouchedData
+        return [sleepTime,resin_recovered_date]
     
     def gather_process(self):
+        print("send_API")
         self.send_API()
         # 未加工状態で使えるデータを収納
-        self.extract()
-        retouchedData = self.retouch()
+        self.extract_datas()
+        retouchedData = self.refine_used_time()
         # 加工状態で使えるデータを追加収納
         self.necessaryData.update(sleeptime=retouchedData[0],recovered_date=retouchedData[1])
         return self.necessaryData
