@@ -7,8 +7,6 @@ from sendAPI import requestAPI
 import GenshinAPIList as Glist
 
 message_json = None
-print(message_json)
-print("PassiveDisco.pyです。")
 with open("src/message.json", "r", encoding="utf-8") as f:
         message_json = json.load(f)
 maxResinTime = Template(message_json["resinRelated"]["maxResinTime"])
@@ -41,7 +39,6 @@ class PassiveAuto(requestAPI):
 
 
     async def dailySend(self):
-        print(self.messages)
 
         if self.requiredData["is_extra_task_reward_received"] == False:
             await self.sendUser.send(f"{self.messages["dailyIncompletion"]}")
@@ -61,17 +58,14 @@ class PassiveAuto(requestAPI):
 
     async def auto_send_message_to_user(self):
         self.sendUser = await self.client.fetch_user(self.discordId)
-        print("while_processです")
         asyncio.create_task(self.dailyScheduler())
         while True:
             try:   
                 self.requiredData = super().gather_process()
                 await self.korosuzo()
-                print(self.requiredData["sleeptime"])
                 await asyncio.sleep(self.requiredData["sleeptime"])
             except Exception as e:
                 await self.errorHundRing()
-                print(f"エラーメッセージは{e}")
                 await asyncio.sleep(3600)
 
 
@@ -107,12 +101,9 @@ class PassiveManual(requestAPI):
         if not message.content.startswith(('$getresintest','$dailymissiontest')):
             return
         
-        print("getValue")
         # type int
         for i in range(0,len(Glist.User)):
-            print("infor")
             if message.author.id == Glist.User.get(f"User{i}").get("discordId"):
-                print("indiscord")
                 # classObjectにはPassiveAutoが格納されている。
                 userInstance = Glist.User[f"User{i}"]["classObject"]
                 await self.sendManualMessage(message,userInstance)

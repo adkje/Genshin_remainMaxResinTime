@@ -21,13 +21,11 @@ class Bot(discord.Client,PassiveManual):
         print(f'We have logged in as {client.user}')
         # # 一度だけjsonを読み込ませたいため、最初はjsonの内容をNoneと定義しておく。
         # await getSendMessages()
-        print("おはようございます。")
         await bot_ready.set()
         
     async def on_message(self,message):
         if message.author == client.user:
             return
-        print("message着弾")
         await self.getValueOfClass(message)
 
 intents = discord.Intents.default()
@@ -42,7 +40,6 @@ client = Bot(intents=intents)
 
 for i in range(0,len(Glist.User)):
         User = Glist.User[f"User{i}"]
-        print(f"これは20行目です。{i}")
         discordId = User["discordId"]
         # sendUser = asyncio.run(define(discordId))
 

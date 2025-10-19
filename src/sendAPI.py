@@ -45,16 +45,11 @@ class requestAPI:
         sleepTime = int_resin_minute % eightMinute
 
         resin_recovered_time = nowDate + addTime
-        print(f"おはよう{resin_recovered_time}")
-        # resin_recovered_date = resin_recovered_time.replace(microsecond = 0)
-        # print(f"こんにちは{resin_recovered_date}")
         resin_recovered_date = resin_recovered_time.strftime("%m月%d日 %H:%M:%S")
-        print(f"おやすみ{resin_recovered_date}")
 
         return [sleepTime,resin_recovered_date]
     
     def gather_process(self):
-        print("send_API")
         self.send_API()
         # 未加工状態で使えるデータを収納
         self.extract_datas()
