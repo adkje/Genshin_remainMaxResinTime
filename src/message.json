@@ -1,6 +1,6 @@
 {
     "resinRelated": {
-        "maxResinTime": "PassiveDisco現在の樹脂は${currentResin}です！200に達するのは${recoveryTime}です！"
+        "maxResinTime": "現在の樹脂は${currentResin}です！200に達するのは${recoveryTime}です！"
     },
     "dailyRelated": {
         "dailyCompletion": "デイリー任務を完了しています。",
