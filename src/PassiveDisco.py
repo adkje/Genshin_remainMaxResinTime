@@ -83,12 +83,12 @@ class PassiveManual(requestAPI):
         # recovered_date = userInstance.requiredData["recovered_date"]
         is_extra_task_reqard_received = userInstance.requiredData["is_extra_task_reward_received"]
         
-        if message.content.startswith('$getresintest'):
+        if message.content.startswith('$getresin'):
             messages = getSendMessages()
             message = messages["maxResinTime"].substitute(currentResin=userInstance.requiredData["current_resin"], recoveryTime=userInstance.requiredData["recovered_date"])
             await userInstance.sendUser.send(f"{message}" )
 
-        if message.content.startswith('$dailymissiontest'):
+        if message.content.startswith('$dailymission'):
             # PassiveAutoをリファクタリングして同一コードをコンポーネント化できる。
             messages = getSendMessages()
             if is_extra_task_reqard_received == False:
@@ -99,7 +99,7 @@ class PassiveManual(requestAPI):
 
     async def getValueOfClass(self,message):
 
-        if not message.content.startswith(('$getresintest','$dailymissiontest')):
+        if not message.content.startswith(('$getresin','$dailymission')):
             return
         
         # type int
