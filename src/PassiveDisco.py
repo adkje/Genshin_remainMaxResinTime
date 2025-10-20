@@ -90,11 +90,12 @@ class PassiveManual(requestAPI):
 
         if message.content.startswith('$dailymissiontest'):
             # PassiveAutoをリファクタリングして同一コードをコンポーネント化できる。
+            messages = getSendMessages()
             if is_extra_task_reqard_received == False:
-                await userInstance.sendUser.send(f"{self.messages["dailyIncompletion"]}")
+                await userInstance.sendUser.send(f"{messages["dailyIncompletion"]}")
 
             else:
-                await userInstance.sendUser.send(f"{self.messages["dailyCompletion"]}")
+                await userInstance.sendUser.send(f"{messages["dailyCompletion"]}")
 
     async def getValueOfClass(self,message):
 
