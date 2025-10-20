@@ -31,10 +31,10 @@ class PassiveAuto(requestAPI):
 
     async def korosuzo(self):
         # requireDataはwhile_processで定義。
-        if self.requiredData["current_resin"] == 132:
+        if self.requiredData["current_resin"] == 180:
             messages = getSendMessages()
             message = messages["maxResinTime"].substitute(currentResin=self.requiredData["current_resin"], recoveryTime=self.requiredData["recovered_date"])
-            await self.sendUser.send(f"おはよう{message}" )
+            await self.sendUser.send(f"{message}" )
         # await asyncio.sleep(self.requiredData["sleeptime"])
 
 
