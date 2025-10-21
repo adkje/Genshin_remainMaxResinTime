@@ -52,7 +52,7 @@ class PassiveAuto(requestAPI):
 
     async def dailyScheduler(self):
         scheduler = AsyncIOScheduler()
-        scheduler.add_job(self.dailySend, 'cron', hour=3, minute=15)
+        scheduler.add_job(self.dailySend, 'cron', hour=22, minute=00)
         scheduler.start()
         await asyncio.Event().wait()
 
